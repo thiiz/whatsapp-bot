@@ -4,7 +4,7 @@ A powerful WhatsApp bot powered by Google Generative AI that can respond to mess
 
 ## Features
 
-- 🤖 **AI-Powered Responses**: Uses Google's Gemini Pro model for intelligent conversations
+- 🤖 **AI-Powered Responses**: Uses Google's gemini-2.0-flash model for intelligent conversations
 - 📱 **WhatsApp Integration**: Built with whatsapp-web.js for seamless WhatsApp Web integration
 - 🔧 **Command System**: Extensible command system with built-in commands
 - 🔐 **Access Control**: Optional user whitelist and admin functionality
