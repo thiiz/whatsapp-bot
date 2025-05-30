@@ -195,3 +195,31 @@ This project is licensed under the MIT License.
 ## Disclaimer
 
 This bot is for educational and personal use. Make sure to comply with WhatsApp's Terms of Service and your local regulations when using automated messaging.
+
+# WhatsApp Bot on Replit
+
+A simple WhatsApp bot that sends a single response per user, powered by Google's Gemini AI.
+
+## Setup Instructions
+
+1. Set your environment variables in Replit Secrets:
+   - `GOOGLE_API_KEY`: Your Google Generative AI API key
+   - `BOT_NAME` (optional): Custom name for your bot
+   - `ALLOWED_NUMBERS` (optional): Comma-separated list of allowed phone numbers
+   - `ADMIN_NUMBERS` (optional): Comma-separated list of admin phone numbers
+
+2. Run the application and scan the QR code with your WhatsApp to authenticate.
+
+3. Keep your bot running 24/7:
+   - Create an account on [UptimeRobot](https://uptimerobot.com/)
+   - Add a new HTTP monitor
+   - Set the URL to your Replit URL with `/` at the end (e.g., `https://whatsapp-bot.yourusername.repl.co/`)
+   - Set checking interval to 5 minutes
+   - Save the monitor
+
+## Troubleshooting
+
+If you encounter issues with Puppeteer or Chromium:
+1. Make sure your `replit.nix` file contains all necessary dependencies
+2. Try restarting your Repl
+3. Check if WhatsApp Web is accessible from your Replit region
