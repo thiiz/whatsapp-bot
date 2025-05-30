@@ -13,6 +13,9 @@ const BOT_PREFIX = process.env.BOT_PREFIX || '!';
 const ALLOWED_NUMBERS = process.env.ALLOWED_NUMBERS ? process.env.ALLOWED_NUMBERS.split(',') : [];
 const ADMIN_NUMBERS = process.env.ADMIN_NUMBERS ? process.env.ADMIN_NUMBERS.split(',') : [];
 
+// Set to track users who have already received a message
+const messagesSent = new Set();
+
 // Initialize WhatsApp client
 const client = new Client({
     authStrategy: new LocalAuth({
@@ -34,46 +37,46 @@ const client = new Client({
 });
 
 // Bot commands
-const commands = {
-    help: {
-        description: 'Show available commands',
-        usage: `${BOT_PREFIX}help`,
-        execute: async (message) => {
-            const helpText = `🤖 *${BOT_NAME}*\n\n` +
-                `💬 *Conversa Livre com IA*\n` +
-                `Você pode enviar qualquer mensagem e eu responderei usando Inteligência Artificial!\n\n` +
-                `🔧 *Comandos Opcionais:*\n` +
-                Object.entries(commands).map(([cmd, info]) =>
-                    `*${info.usage}* - ${info.description}`
-                ).join('\n') +
-                `\n\n✨ *Dica:* Não precisa usar comandos! Apenas converse comigo naturalmente.`;
+// const commands = {
+//     help: {
+//         description: 'Show available commands',
+//         usage: `${BOT_PREFIX}help`,
+//         execute: async (message) => {
+//             const helpText = `🤖 *${BOT_NAME}*\n\n` +
+//                 `💬 *Conversa Livre com IA*\n` +
+//                 `Você pode enviar qualquer mensagem e eu responderei usando Inteligência Artificial!\n\n` +
+//                 `🔧 *Comandos Opcionais:*\n` +
+//                 Object.entries(commands).map(([cmd, info]) =>
+//                     `*${info.usage}* - ${info.description}`
+//                 ).join('\n') +
+//                 `\n\n✨ *Dica:* Não precisa usar comandos! Apenas converse comigo naturalmente.`;
 
-            await message.reply(helpText);
-        }
-    },
+//             await message.reply(helpText);
+//         }
+//     },
 
-    ping: {
-        description: 'Check if bot is responsive',
-        usage: `${BOT_PREFIX}ping`,
-        execute: async (message) => {
-            await message.reply('🏓 Pong! Bot is working correctly.');
-        }
-    },
+//     ping: {
+//         description: 'Check if bot is responsive',
+//         usage: `${BOT_PREFIX}ping`,
+//         execute: async (message) => {
+//             await message.reply('🏓 Pong! Bot is working correctly.');
+//         }
+//     },
 
-    info: {
-        description: 'Get bot information',
-        usage: `${BOT_PREFIX}info`,
-        execute: async (message) => {
-            const info = `🤖 *${BOT_NAME}*\n\n` +
-                `📱 WhatsApp Web Integration\n` +
-                `🧠 Powered by Google Generative AI\n` +
-                `⚡ Node.js Runtime\n\n` +
-                `Type any message to chat with AI or use ${BOT_PREFIX}help for commands.`;
+//     info: {
+//         description: 'Get bot information',
+//         usage: `${BOT_PREFIX}info`,
+//         execute: async (message) => {
+//             const info = `🤖 *${BOT_NAME}*\n\n` +
+//                 `📱 WhatsApp Web Integration\n` +
+//                 `🧠 Powered by Google Generative AI\n` +
+//                 `⚡ Node.js Runtime\n\n` +
+//                 `Type any message to chat with AI or use ${BOT_PREFIX}help for commands.`;
 
-            await message.reply(info);
-        }
-    }
-};
+//             await message.reply(info);
+//         }
+//     }
+// };
 
 // Utility functions
 function isAllowedUser(phoneNumber) {
@@ -85,21 +88,23 @@ function isAdmin(phoneNumber) {
     return ADMIN_NUMBERS.includes(phoneNumber);
 }
 
-function extractCommand(messageBody) {
-    if (!messageBody.startsWith(BOT_PREFIX)) return null;
+// function extractCommand(messageBody) {
+//     if (!messageBody.startsWith(BOT_PREFIX)) return null;
 
-    const parts = messageBody.slice(BOT_PREFIX.length).trim().split(' ');
-    return {
-        command: parts[0].toLowerCase(),
-        args: parts.slice(1)
-    };
-}
+//     const parts = messageBody.slice(BOT_PREFIX.length).trim().split(' ');
+//     return {
+//         command: parts[0].toLowerCase(),
+//         args: parts.slice(1)
+//     };
+// }
 
 async function generateAIResponse(prompt, userInfo) {
     try {
-        const enhancedPrompt = `Você é um assistente de WhatsApp amigável e inteligente. O nome do usuário é ${userInfo.name}.
-        Responda de forma natural, amigável e conversacional em português brasileiro.
-        Mantenha as respostas concisas mas informativas. Use emojis quando apropriado para tornar a conversa mais divertida.
+        const enhancedPrompt = `Você é um assistente de uma loja de produtos dropshipping.
+        quando um cliente mandar uma mensagem, você deve responder que um atendente irá responder o mais breve possível.
+        o cliente não pode fazer pedidos, apenas perguntas.
+        não responda nenhuma pergunta do cliente, apenas responda que um atendente irá responder o mais breve possível.
+        não use emojis, apenas use texto.
 
         Mensagem do usuário: ${prompt}`;
 
@@ -160,10 +165,16 @@ client.on('message_create', async (message) => {
         console.log(`📨 Message from ${userName} (${phoneNumber}): ${message.body}`);
 
         // Check if message is a command first
-        const commandData = extractCommand(message.body);
-        if (commandData && commands[commandData.command]) {
-            console.log(`🔧 Executing command: ${commandData.command}`);
-            await commands[commandData.command].execute(message, commandData.args);
+        // const commandData = extractCommand(message.body);
+        // if (commandData && commands[commandData.command]) {
+        //     console.log(`🔧 Executing command: ${commandData.command}`);
+        //     await commands[commandData.command].execute(message, commandData.args);
+        //     return;
+        // }
+
+        // Check if user has already received a message
+        if (messagesSent.has(phoneNumber)) {
+            console.log(`🔄 User ${userName} (${phoneNumber}) already received a message, skipping.`);
             return;
         }
 
@@ -181,6 +192,9 @@ client.on('message_create', async (message) => {
 
             await message.reply(aiResponse);
             console.log('✅ AI response sent successfully');
+
+            // Add user to the set of users who received a message
+            messagesSent.add(phoneNumber);
         }
 
     } catch (error) {
