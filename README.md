@@ -195,3 +195,89 @@ This project is licensed under the MIT License.
 ## Disclaimer
 
 This bot is for educational and personal use. Make sure to comply with WhatsApp's Terms of Service and your local regulations when using automated messaging.
+
+# WhatsApp Bot - Vercel Deployment
+
+This is a WhatsApp bot built to integrate with external WhatsApp API services and deployed on Vercel.
+
+## Important Note
+
+This project has been modified to work as a webhook-based API on Vercel. The original WhatsApp-web.js implementation won't work on Vercel because:
+
+1. Vercel uses serverless functions which don't support long-running processes
+2. Puppeteer (used by whatsapp-web.js) requires a browser environment
+3. The QR code authentication flow is difficult to manage in serverless environments
+
+## How to Deploy to Vercel
+
+### 1. Prepare your project
+
+Make sure you have the following files:
+- `api/webhook.js` (the main API endpoint)
+- `vercel.json` (configuration for Vercel)
+- `.env` (environment variables)
+
+### 2. Install the Vercel CLI
+
+```bash
+npm install -g vercel
+```
+
+### 3. Set up environment variables
+
+You need to add your environment variables to Vercel:
+
+```bash
+vercel env add GOOGLE_API_KEY
+```
+
+Enter your Google API key when prompted.
+
+### 4. Deploy to Vercel
+
+```bash
+vercel
+```
+
+Follow the prompts to link your project to a Vercel account.
+
+### 5. Connect to a WhatsApp API service
+
+Since this is now a webhook-based API, you'll need to connect it to an external WhatsApp API service that can:
+
+1. Receive messages from WhatsApp
+2. Forward them to your Vercel webhook
+3. Send responses back to WhatsApp
+
+Some options include:
+- [Twilio API for WhatsApp](https://www.twilio.com/whatsapp)
+- [360dialog](https://www.360dialog.com/)
+- [MessageBird](https://messagebird.com/en/whatsapp)
+
+## API Usage
+
+Your Vercel webhook expects POST requests with this format:
+
+```json
+{
+  "message": "Hello, I need help with my order",
+  "sender": {
+    "phone": "1234567890",
+    "name": "John Doe"
+  }
+}
+```
+
+And will respond with:
+
+```json
+{
+  "response": "Um atendente irá responder o mais breve possível.",
+  "recipient": "1234567890"
+}
+```
+
+## Limitations
+
+- The `messagesSent` Set will reset whenever the serverless function restarts
+- For persistent storage of users who already received messages, use a database like MongoDB Atlas or Vercel KV
